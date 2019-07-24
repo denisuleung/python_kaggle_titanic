@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_val_score
 
+
 class ExcelIO:
     def __init__(self, raw_train=None, raw_test=None, submit=None, path=None):
         self.raw_train, self.raw_test = raw_train, raw_test
@@ -12,7 +13,7 @@ class ExcelIO:
         self.path = path
 
     def import_csv(self):
-        self.path = "C:/Users/Public/Program/Python/Project/Competition/Titanic/"
+        self.path = "Z:/Kaggle/Pycharm ML/Competition/Titanic_Upload/"
         self.raw_train = pd.read_csv(self.path + "train.csv")
         self.raw_test = pd.read_csv(self.path + "test.csv")
 
@@ -62,7 +63,6 @@ class Scope():
     def get_data_in_scope(self):
         self.train = self.raw_train[self.low_card_cols + self.numeric_cols + ['Survived']]
         self.test = self.raw_test[self.low_card_cols + self.numeric_cols]
-        print('titanic_train_data: Data_Scope', self.train.shape)
 
     def main(self):
         self.define_low_card_and_numeric_col()
@@ -107,7 +107,6 @@ class Classifier:
     def main(self):
         self.train = self.apply_break_down(self.train, self.raw_train)
         self.test = self.apply_break_down(self.test, self.raw_test)
-        print('titanic_train_data: Extract', self.train.shape)
 
 
 classified = Classifier(scoped.raw_train, scoped.raw_test, scoped.train, scoped.test)
@@ -168,14 +167,14 @@ class Imputation:
         self.train, self.test = train, test
         self.imputer = imputer
 
-    def imputate(self):
+    def impute(self):
         self.imputer = Imputer()
         self.train['Age'] = self.imputer.fit_transform(self.train['Age'].to_frame())
         self.test['Age'] = self.imputer.transform(self.test['Age'].to_frame())
 
 
 imputated = Imputation(added.train, added.test)
-imputated.imputate()
+imputated.impute()
 added = ColumnAddition(imputated.train, imputated.test)
 added.add_survive_order()
 
@@ -206,7 +205,6 @@ class OneHotEncoder:
     def fill_na_after_encode(self):
         self.cat_train.fillna(0, inplace=True)
         self.cat_test.fillna(0, inplace=True)
-        print('titanic_cat_train_data: Final', self.cat_train.shape)
 
     def main(self):
         self.encode()
@@ -223,7 +221,7 @@ class Model:
         self.train, self.test = train, test
         self.cat_train, self.cat_test = cat_train, cat_test
         self.y, self.x = y, x
-        self.train_y, self.train_x, self.val_y, self.val_x  = train_y, train_x, val_y, val_x
+        self.train_y, self.train_x, self.val_y, self.val_x = train_y, train_x, val_y, val_x
         self.model = model
         self.pipeline = pipeline
         self.cvs = cvs
@@ -263,4 +261,5 @@ class Model:
 
 
 model_df = Model(encoded.train, encoded.test, encoded.cat_train, encoded.cat_test)
+model_df.main()
 excel.export_csv(model_df.cat_test)
